@@ -1,65 +1,68 @@
-# 1. Nâng phiên bản tối thiểu lên 3.20
 cmake_minimum_required(VERSION 3.20)
-project(STM32_BareMetal_App LANGUAGES C)
+project(bcm_lite LANGUAGES C)
 
-# Chuẩn C11, tắt extension
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-# ==============================================================================
-# TẦNG PLATFORM (Phần cứng)
-# ==============================================================================
-# Tạo một pseudo-target (target ảo) đại diện cho nền tảng phần cứng
+set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/platform/stm32f103/linker/stm32f103c8.ld)
+
+# ============================================================
+# TẦNG PLATFORM
+# ============================================================
 add_library(platform_stm32f103 INTERFACE)
 
-# Gắn cờ CPU, tối ưu section và zero-warning vào platform
 target_compile_options(platform_stm32f103 INTERFACE
     -mcpu=cortex-m3
     -mthumb
-    -ffunction-sections  # Chia function vào các section riêng để linker dọn rác
-    -fdata-sections      # Chia biến toàn cục vào các section riêng
+    -ffunction-sections
+    -fdata-sections
     -Wall
     -Wextra
-    -Werror              # Bắt buộc sửa warning, không cho phép lơ đi
-    -Wpedantic           # Bắt lỗi vi phạm chuẩn C11 thuần túy
+    -Werror
+    -Wpedantic
 )
 
-# ==============================================================================
-# CẤU HÌNH LINKER & RUNTIME CHO TẦNG PLATFORM
-# ==============================================================================
 target_link_options(platform_stm32f103 INTERFACE
-    # --- 1. Nhóm cờ Linker ---
-    "-Wl,--gc-sections"
-    "-Wl,--print-memory-usage"
-    
-    # Sinh file map động theo tên của Target (Generator Expression)
+    -mcpu=cortex-m3
+    -mthumb
+    -nostartfiles
+    --specs=nano.specs
+    --specs=nosys.specs
+    "-T" "${LINKER_SCRIPT}"
+    -Wl,--gc-sections
+    -Wl,--orphan-handling=warn
+    -Wl,--print-memory-usage
     "-Wl,-Map=$<TARGET_PROPERTY:NAME>.map"
-
-    # --- 2. Nhóm cờ Runtime (C Standard Library) ---
-    "--specs=nano.specs"
-    "--specs=nosys.specs"
 )
 
-# Macro dòng chip
-target_compile_definitions(platform_stm32f103 INTERFACE 
+target_sources(platform_stm32f103 INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/stm32f103/startup/startup_stm32f103.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/stm32f103/system/system_stm32f103.c
+)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/stm32f103/startup/startup_stm32f103.c
+    PROPERTIES COMPILE_OPTIONS "-fno-tree-loop-distribute-patterns"
+)
+
+target_compile_definitions(platform_stm32f103 INTERFACE
     STM32F103xB
 )
 
-# Include path phần cứng
-target_include_directories(platform_stm32f103 INTERFACE
-    external/cmsis/core
-    external/cmsis/device
+target_include_directories(platform_stm32f103 SYSTEM INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/cmsis/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/cmsis/device
 )
 
-# ==============================================================================
-# TẦNG APPLICATION (Phần mềm)
-# ==============================================================================
-# Đặt tên target thuần túy là "bcm" (hoặc tên ứng dụng của bạn)
+# ============================================================
+# TẦNG APPLICATION
+# ============================================================
 add_executable(bcm app/main.c)
 
-# Yêu cầu CMake gắn thêm đuôi .elf khi sinh file vật lý (đầu ra sẽ là bcm.elf)
-set_target_properties(bcm PROPERTIES SUFFIX ".elf")
+set_target_properties(bcm PROPERTIES
+    SUFFIX ".elf"
+    LINK_DEPENDS ${LINKER_SCRIPT}
+)
 
-# Các lệnh sau này thao tác với target cực kỳ gọn gàng
 target_link_libraries(bcm PRIVATE platform_stm32f103)
