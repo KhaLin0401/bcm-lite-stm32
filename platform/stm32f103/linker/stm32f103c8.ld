@@ -29,9 +29,15 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.text)           
-    *(.text*)          
+    *(.text*)
+
+    /* Định tuyến nhóm Veneer (Keo nối mã lệnh) */
+    *(.glue_7)         /* Cầu nối gọi hàm từ ARM sang Thumb */
+    *(.glue_7t)        /* Cầu nối gọi hàm từ Thumb sang ARM */
+    *(.vfp11_veneer)   /* Veneer cho FPU (Dù M3 không có FPU nhưng nên để cho chuẩn form) */
+    *(.v4_bx)          /* Lệnh rẽ nhánh kiến trúc v4 */          
     . = ALIGN(4);
-    _etext = .;        
+    _etext = .;          
   } >FLASH
 
   /* Mục 5: Tách riêng .rodata ra khỏi .text */
@@ -87,7 +93,18 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         
   } >RAM
-}
 
+  /DISCARD/ :
+  {
+    libc.a ( * )
+    libm.a ( * )
+    libgcc.a ( * )
+    *(.comment)
+    *(.ARM.attributes)
+    *(.iplt)
+    *(.rel.iplt)
+    *(.igot.plt)
+  }
+}
   /* --- ASSERT kiểm tra RAM cho Stack --- */
   ASSERT(_estack - _ebss >= _Min_Stack_Size, "Loi Linker: Khong con du RAM cho Stack! Nguy co Stack Overflow.");
