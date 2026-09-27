@@ -22,8 +22,10 @@ jobs:
     - name: Cấu hình và Biên dịch Firmware (CMake + Ninja)
       run: |
         # 1. Khởi tạo môi trường build với Ninja
-        cmake -B build -G Ninja
-        DCMAKE_TOOLCHAIN_FILE=duong_dan_toi_file_toolchain.cmake 
+        cmake -B build -G Ninja \
+          -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
+          -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ \
+          -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc 
         
         # 2. Tiến hành build code
         cmake --build build
