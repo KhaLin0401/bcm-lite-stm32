@@ -1,0 +1,31 @@
+name: Firmware CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Sử dụng máy ảo Ubuntu của GitHub
+
+    steps:
+    - name: Checkout mã nguồn
+      uses: actions/checkout@v4
+
+    - name: Cài đặt ARM GCC Toolchain & Make
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-none-eabi make
+
+    - name: Biên dịch Firmware
+      run: |
+        make clean
+        make -j$(nproc)
+
+    - name: Upload Firmware Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: firmware-bin
+        path: build/*.bin
