@@ -66,3 +66,36 @@ set_target_properties(bcm PROPERTIES
 )
 
 target_link_libraries(bcm PRIVATE platform_stm32f103)
+
+# ==============================================================================
+# POST-BUILD ACTIONS (Sinh file nạp)
+# ==============================================================================
+add_custom_command(TARGET bcm POST_BUILD
+    # 1. Sinh file .hex (dùng cho các tool nạp ST-Link Utility, STM32CubeProgrammer)
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:bcm> $<TARGET_FILE_DIR:bcm>/$<TARGET_FILE_BASE_NAME:bcm>.hex
+    
+    # 2. Sinh file .bin (dùng để nạp qua bootloader, OTA hoặc J-Link)
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bcm> $<TARGET_FILE_DIR:bcm>/$<TARGET_FILE_BASE_NAME:bcm>.bin
+    
+    # 3. In ra dung lượng file (Kinh điển của GCC)
+    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:bcm>
+    
+    COMMENT "Generating file .hex and .bin..."
+)
+
+# ==============================================================================
+# FLASH TARGET (Nạp firmware qua pyOCD)
+# ==============================================================================
+add_custom_target(flash
+    # Lệnh gọi pyOCD để nạp file .elf
+    COMMAND pyocd flash $<TARGET_FILE:bcm> -t stm32f103c8
+    
+    # Rất quan trọng: Bắt buộc phải build target 'bcm' thành công trước khi nạp
+    DEPENDS bcm
+    
+    # Hiển thị thông báo khi bắt đầu chạy
+    COMMENT "Flashing firmware to STM32 by pyOCD..."
+    
+    # Cho phép pyOCD chiếm quyền điều khiển terminal để in thanh tiến trình (progress bar)
+    USES_TERMINAL 
+)
