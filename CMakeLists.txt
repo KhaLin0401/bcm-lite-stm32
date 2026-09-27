@@ -78,7 +78,7 @@ add_custom_command(TARGET bcm POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:bcm> $<TARGET_FILE_DIR:bcm>/$<TARGET_FILE_BASE_NAME:bcm>.bin
     
     # 3. In ra dung lượng file (Kinh điển của GCC)
-    COMMAND ${CMAKE_SIZE} $<TARGET_FILE:bcm>
+    COMMAND arm-none-eabi-size ${CMAKE_SIZE} $<TARGET_FILE:bcm>
     
     COMMENT "Generating file .hex and .bin..."
 )
