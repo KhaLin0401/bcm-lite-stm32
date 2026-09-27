@@ -25,7 +25,8 @@ jobs:
         cmake -B build -G Ninja \
           -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
           -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ \
-          -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc 
+          -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc \
+          -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY 
         
         # 2. Tiến hành build code
         cmake --build build
