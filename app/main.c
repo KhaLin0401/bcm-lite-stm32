@@ -33,6 +33,7 @@ int main(void)
         // Xung nhịp HSI mặc định là 8MHz, vòng lặp này mất vài chu kỳ máy mỗi lần lặp.
         for (volatile uint32_t i = 0; i < 500000; i++) {
             // Không làm gì cả
+            // Done
         }
     }
 
