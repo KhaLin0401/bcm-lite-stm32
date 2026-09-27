@@ -22,8 +22,8 @@ jobs:
     - name: Cấu hình và Biên dịch Firmware (CMake + Ninja)
       run: |
         # 1. Khởi tạo môi trường build với Ninja
-        # (Nếu bạn dùng file toolchain riêng cho ARM, hãy thêm -DCMAKE_TOOLCHAIN_FILE=... vào đây)
-        cmake -B build -G Ninja 
+        cmake -B build -G Ninja -
+        DCMAKE_TOOLCHAIN_FILE=duong_dan_toi_file_toolchain.cmake 
         
         # 2. Tiến hành build code
         cmake --build build
