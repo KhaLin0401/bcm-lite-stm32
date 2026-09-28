@@ -162,10 +162,10 @@ void Reset_Handler(void)
 
     /* Copy .data từ LMA (Flash) sang VMA (RAM) */
     src = &_sidata;
-    // for (dest = &_sdata; dest < &_edata;)
-    // {
-    //     *dest++ = *src++;
-    // }
+    for (dest = &_sdata; dest < &_edata;)
+    {
+        *dest++ = *src++;
+    }
 
     /* Xóa .bss */
     for (dest = &_sbss; dest < &_ebss;)

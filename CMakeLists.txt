@@ -15,6 +15,7 @@ add_library(platform_stm32f103 INTERFACE)
 target_compile_options(platform_stm32f103 INTERFACE
     -mcpu=cortex-m3
     -mthumb
+    -O2
     -g3
     -ffunction-sections
     -fdata-sections

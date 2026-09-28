@@ -31,7 +31,7 @@ int main(void)
         // Busy-wait delay (tương đối). 
         // Từ khóa 'volatile' ép trình biên dịch không được phép bỏ qua vòng lặp trống này.
         // Xung nhịp HSI mặc định là 8MHz, vòng lặp này mất vài chu kỳ máy mỗi lần lặp.
-        for (volatile uint32_t i = 0; i < 500000; i++) {
+        for (volatile i = 0; i < 500000; i++) {
             // Không làm gì cả
             // Done
         }
